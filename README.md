@@ -16,6 +16,7 @@ Supports both **Google Gemini** (recommended for speed and native tool use) and 
   - **Replanner**: Dynamically adapts and rewrites remaining steps if blockers or errors occur.
   - **Finalizer**: Synthesizes results into a polished deliverable.
 - **Integrated Tool Suite**:
+  - 📦 **Automatic Package Manager**: Tool (`install_package`) and Python sandbox auto-recovery that automatically installs or upgrades missing PyPI packages (`pandas`, `beautifulsoup4`, `matplotlib`, etc.) on-demand.
   - 🧠 **Hugging Face Embeddings & Semantic Search**: Tools (`semantic_search_text`, `semantic_search_file`) for token-efficient retrieval, slashing prompt tokens by up to 90%.
   - 🔍 **Code Linter**: Ruff-powered linting tool (`lint_code`) for verifying and auto-fixing generated Python code.
   - 🐍 **Python REPL**: Dynamic code execution for computations, data analysis, and script running.

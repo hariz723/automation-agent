@@ -11,7 +11,7 @@ from src.embeddings import chunk_text, get_hf_embeddings, semantic_search_chunks
 @tool
 def semantic_search_text(text: str, query: str, top_k: int = 3) -> str:
     """Split a long text into chunks, compute Hugging Face embeddings, and return only the top-k most relevant chunks to reduce prompt token size.
-    
+
     Args:
         text: The large text content to search within.
         query: What specific information or answer you are looking for.
@@ -47,7 +47,7 @@ def semantic_search_text(text: str, query: str, top_k: int = 3) -> str:
 @tool
 def semantic_search_file(filepath: str, query: str, top_k: int = 3) -> str:
     """Read a large workspace file, compute Hugging Face embeddings, and retrieve only the top-k relevant sections instead of passing the entire file to save tokens.
-    
+
     Args:
         filepath: Relative or absolute path to the file.
         query: The question, topic, or function name you need from the file.
@@ -64,11 +64,13 @@ def semantic_search_file(filepath: str, query: str, top_k: int = 3) -> str:
         with open(path, encoding="utf-8", errors="replace") as f:
             content = f.read()
 
-        return semantic_search_text.invoke({
-            "text": content,
-            "query": query,
-            "top_k": top_k,
-        })
+        return semantic_search_text.invoke(
+            {
+                "text": content,
+                "query": query,
+                "top_k": top_k,
+            }
+        )
 
     except Exception as e:
         return f"Error reading and embedding file {filepath}: {e!s}"

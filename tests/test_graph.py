@@ -39,11 +39,13 @@ Baking sourdough bread requires flour, water, salt, and wild yeast culture ferme
 
 LangGraph is a library for building stateful, multi-actor applications with LLMs using graph nodes.
 """
-    result = semantic_search_text.invoke({
-        "text": long_text,
-        "query": "How does LangGraph build stateful LLM apps?",
-        "top_k": 1,
-    })
+    result = semantic_search_text.invoke(
+        {
+            "text": long_text,
+            "query": "How does LangGraph build stateful LLM apps?",
+            "top_k": 1,
+        }
+    )
 
     assert "Token Reduction via HF Embeddings" in result
     assert "LangGraph is a library" in result
@@ -58,11 +60,13 @@ def test_semantic_search_file(tmp_path):
         "Section 2: Authentication using JWT tokens and OAuth2.\n\n"
         "Section 3: Kubernetes deployment manifests."
     )
-    result = semantic_search_file.invoke({
-        "filepath": str(test_file),
-        "query": "Where is JWT and OAuth2 security configured?",
-        "top_k": 1,
-    })
+    result = semantic_search_file.invoke(
+        {
+            "filepath": str(test_file),
+            "query": "Where is JWT and OAuth2 security configured?",
+            "top_k": 1,
+        }
+    )
     assert "Section 2" in result
     assert "JWT tokens" in result
 

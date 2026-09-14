@@ -40,7 +40,7 @@ class FastDeterministicEmbeddings(Embeddings):
 
 def get_hf_embeddings(model_name: str | None = None) -> Embeddings:
     """Return Hugging Face embeddings model.
-    
+
     Priority:
       1. HuggingFaceEndpointEmbeddings if HF token is configured (cloud API, zero local disk).
       2. HuggingFaceEmbeddings if sentence-transformers is installed locally.
@@ -52,6 +52,7 @@ def get_hf_embeddings(model_name: str | None = None) -> Embeddings:
     if token:
         try:
             from langchain_huggingface import HuggingFaceEndpointEmbeddings
+
             return HuggingFaceEndpointEmbeddings(
                 model=model,
                 huggingfacehub_api_token=token,
@@ -61,6 +62,7 @@ def get_hf_embeddings(model_name: str | None = None) -> Embeddings:
 
     try:
         from langchain_huggingface import HuggingFaceEmbeddings
+
         return HuggingFaceEmbeddings(model_name=model)
     except Exception:
         pass
@@ -98,7 +100,7 @@ def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> list[str]
                 if current_len >= chunk_size:
                     chunks.append(" ".join(current_chunk))
                     # Keep overlap words
-                    overlap_words = current_chunk[-max(1, overlap // 10):]
+                    overlap_words = current_chunk[-max(1, overlap // 10) :]
                     current_chunk = list(overlap_words)
                     current_len = sum(len(w) + 1 for w in current_chunk)
 
@@ -125,11 +127,13 @@ def semantic_search_chunks(
     scored_chunks = []
     for i, (chunk, vec) in enumerate(zip(chunks, doc_vectors)):
         sim = cosine_similarity(query_vec, vec)
-        scored_chunks.append({
-            "chunk_id": i + 1,
-            "content": chunk,
-            "similarity": round(sim, 4),
-        })
+        scored_chunks.append(
+            {
+                "chunk_id": i + 1,
+                "content": chunk,
+                "similarity": round(sim, 4),
+            }
+        )
 
     # Sort descending by similarity
     scored_chunks.sort(key=lambda x: x["similarity"], reverse=True)

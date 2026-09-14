@@ -2,6 +2,7 @@
 
 from langchain_core.tools import BaseTool
 
+from src.tools.embedding_tools import semantic_search_file, semantic_search_text
 from src.tools.file_tools import list_files, read_file, write_file
 from src.tools.lint_tools import lint_code
 from src.tools.python_repl import execute_python
@@ -14,6 +15,8 @@ ALL_TOOLS: list[BaseTool] = [
     read_file,
     list_files,
     lint_code,
+    semantic_search_text,
+    semantic_search_file,
     execute_python,
     web_search,
     fetch_webpage,

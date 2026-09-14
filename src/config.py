@@ -25,6 +25,9 @@ class Config:
         "HF_TOKEN", ""
     )
     HF_MODEL: str = os.getenv("HF_MODEL", "Qwen/Qwen2.5-72B-Instruct")
+    HF_EMBEDDING_MODEL: str = os.getenv(
+        "HF_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+    )
 
     # Execution limits
     MAX_STEP_RETRIES: int = int(os.getenv("MAX_STEP_RETRIES", "2"))

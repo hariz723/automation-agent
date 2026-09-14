@@ -4,15 +4,67 @@ from unittest.mock import MagicMock
 
 from langchain_core.messages import AIMessage
 
+from src.embeddings import cosine_similarity, get_hf_embeddings
 from src.graph import build_automation_graph, create_evaluation_router
 from src.nodes.evaluator import EvaluationSchema, evaluator_node
 from src.nodes.finalizer import finalizer_node
 from src.nodes.planner import PlanSchema, StepSchema, planner_node
 from src.state import AutomationState
+from src.tools.embedding_tools import semantic_search_file, semantic_search_text
 from src.tools.file_tools import read_file, write_file
 from src.tools.lint_tools import lint_code
 from src.tools.python_repl import execute_python
 from src.tools.shell_tools import execute_shell
+
+
+def test_hf_embeddings_similarity():
+    """Test embedding calculation and cosine similarity ranking."""
+    emb = get_hf_embeddings()
+    v1 = emb.embed_query("deep learning machine learning artificial intelligence")
+    v2 = emb.embed_query("neural networks neural models AI")
+    v3 = emb.embed_query("chocolate cake baking recipe flour sugar")
+
+    sim_ai = cosine_similarity(v1, v2)
+    sim_unrelated = cosine_similarity(v1, v3)
+
+    assert sim_ai > sim_unrelated
+
+
+def test_semantic_search_text_token_reduction():
+    """Test chunking and semantic search retrieval to reduce token size."""
+    long_text = """
+The Python runtime environment manages memory automatically using reference counting and garbage collection.
+
+Baking sourdough bread requires flour, water, salt, and wild yeast culture fermented over 24 hours.
+
+LangGraph is a library for building stateful, multi-actor applications with LLMs using graph nodes.
+"""
+    result = semantic_search_text.invoke({
+        "text": long_text,
+        "query": "How does LangGraph build stateful LLM apps?",
+        "top_k": 1,
+    })
+
+    assert "Token Reduction via HF Embeddings" in result
+    assert "LangGraph is a library" in result
+    assert "sourdough bread" not in result
+
+
+def test_semantic_search_file(tmp_path):
+    """Test semantic file search and retrieval."""
+    test_file = tmp_path / "architecture.txt"
+    test_file.write_text(
+        "Section 1: Database configuration using PostgreSQL.\n\n"
+        "Section 2: Authentication using JWT tokens and OAuth2.\n\n"
+        "Section 3: Kubernetes deployment manifests."
+    )
+    result = semantic_search_file.invoke({
+        "filepath": str(test_file),
+        "query": "Where is JWT and OAuth2 security configured?",
+        "top_k": 1,
+    })
+    assert "Section 2" in result
+    assert "JWT tokens" in result
 
 
 def test_lint_code_valid():

@@ -29,13 +29,29 @@ def executor_node(state: AutomationState, llm) -> dict[str, Any]:
     current_step = plan[current_index]
     current_step["status"] = "in_progress"
 
-    # Format history summary of previously completed steps
-    history_summary = []
-    for h in step_history:
-        history_summary.append(
-            f"Step {h.get('step_id')}: {h.get('title')}\nResult: {h.get('result')}\n"
+    # Format history summary (use semantic embedding retrieval if history is large to reduce tokens)
+    if len(step_history) > 3:
+        from src.embeddings import semantic_search_chunks
+
+        # Retrieve the 2 most semantically relevant steps plus the immediate previous step
+        prior_texts = [
+            f"Step {h.get('step_id')}: {h.get('title')}\nResult: {h.get('result')}"
+            for h in step_history[:-1]
+        ]
+        query = f"{current_step.get('title', '')} {current_step.get('description', '')}"
+        relevant = semantic_search_chunks(query=query, chunks=prior_texts, top_k=2)
+        selected_texts = [r["content"] for r in relevant]
+        # Always include immediate previous step for continuity
+        selected_texts.append(
+            f"Step {step_history[-1].get('step_id')}: {step_history[-1].get('title')}\nResult: {step_history[-1].get('result')}"
         )
-    history_str = "\n---\n".join(history_summary) if history_summary else "No prior steps yet."
+        history_str = "\n---\n".join(selected_texts)
+    else:
+        history_summary = [
+            f"Step {h.get('step_id')}: {h.get('title')}\nResult: {h.get('result')}\n"
+            for h in step_history
+        ]
+        history_str = "\n---\n".join(history_summary) if history_summary else "No prior steps yet."
 
     system_instruction = f"""You are an autonomous AI Execution Agent capable of completing tasks using tools.
 You are currently executing Step {current_step.get("id")}: '{current_step.get("title")}'.

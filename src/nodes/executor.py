@@ -69,11 +69,12 @@ Expected Output Criteria:
 {current_step.get("expected_output")}
 
 Guidelines:
-1. Use the provided tools (file operations, Python REPL, web search, shell) to fulfill this step.
-2. If code needs to be executed or tested, use 'execute_python' or 'execute_shell'.
-3. If files need to be created or read, use 'write_file' or 'read_file'.
-4. If web information is needed, use 'web_search' or 'fetch_webpage'.
-5. Once you have performed the necessary actions and verified the result, provide a clear, concise summary of what was accomplished and the concrete output.
+1. Use the provided tools (file operations, Python REPL, package installation, web search, shell) to fulfill this step.
+2. If third-party libraries are needed (e.g. pandas, beautifulsoup4, openpyxl, matplotlib) or if any import fails with ModuleNotFoundError, use 'install_package' to automatically install or upgrade it, or run 'execute_python' which auto-installs missing dependencies.
+3. If code needs to be executed or tested, use 'execute_python' or 'execute_shell'.
+4. If files need to be created or read, use 'write_file' or 'read_file'.
+5. If web information is needed, use 'web_search' or 'fetch_webpage'.
+6. Once you have performed the necessary actions and verified the result, provide a clear, concise summary of what was accomplished and the concrete output.
 """
 
     user_msg_content = f"Execute step {current_step.get('id')}: {current_step.get('title')}."

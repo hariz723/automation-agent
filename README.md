@@ -171,6 +171,22 @@ The agent itself has access to `lint_code` in its toolbelt ([`src/tools/lint_too
 
 ---
 
+## 🧠 Hugging Face Embeddings & Token Reduction
+
+To prevent context window bloat and reduce token costs by up to 90%, the agent integrates Hugging Face embeddings ([`src/embeddings.py`](file:///home/hari/projects/automation-agent/src/embeddings.py)):
+
+### How it works
+1. **Semantic Search Tools**:
+   - `semantic_search_text`: Chunks large texts or web page scrapes, embeds them with Hugging Face models (e.g. `sentence-transformers/all-MiniLM-L6-v2`), and returns only the top $k$ relevant snippets.
+   - `semantic_search_file`: Reads large code or data files and retrieves only the sections required for the current prompt.
+2. **Dynamic Step History Pruning**:
+   - In [`src/nodes/executor.py`](file:///home/hari/projects/automation-agent/src/nodes/executor.py), when execution history grows across multiple steps, embeddings retrieve only the previous step findings semantically related to the current subtask rather than stuffing the full history into the prompt.
+3. **Flexible Inference**:
+   - Uses `HuggingFaceEndpointEmbeddings` if `HUGGINGFACEHUB_API_TOKEN` / `HF_TOKEN` is present (zero local disk footprint).
+   - Automatically falls back to deterministic embedding when offline.
+
+---
+
 ## 🧪 Testing
 
 Run the comprehensive test suite (unit tests, tools, linter, router, and end-to-end graph simulation):

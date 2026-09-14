@@ -1,7 +1,7 @@
 .PHONY: help install sync lint lint-fix format test check run interactive visualize clean
 
 # Default prompt when running 'make run' without arguments
-PROMPT ?= "Fetch current top tech news and save a markdown summary to news.md"
+PROMPT ?= "Fetch past 2 weeks python roles jobs and opening in linkedin and summarize them in a table with title, company, location, and link, and save it job.md file"
 
 help: ## Show this help message
 	@echo "Available commands:"

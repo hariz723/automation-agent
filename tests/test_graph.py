@@ -13,8 +13,22 @@ from src.state import AutomationState
 from src.tools.embedding_tools import semantic_search_file, semantic_search_text
 from src.tools.file_tools import read_file, write_file
 from src.tools.lint_tools import lint_code
+from src.tools.package_tools import MODULE_TO_PYPI, install_package
 from src.tools.python_repl import execute_python
 from src.tools.shell_tools import execute_shell
+
+
+def test_package_mapping():
+    """Test common module to PyPI package mappings."""
+    assert MODULE_TO_PYPI["bs4"] == "beautifulsoup4"
+    assert MODULE_TO_PYPI["cv2"] == "opencv-python"
+    assert MODULE_TO_PYPI["sklearn"] == "scikit-learn"
+
+
+def test_install_package_invalid():
+    """Test that invalid package names are rejected safely."""
+    res = install_package.invoke({"package_name": "pandas; rm -rf /"})
+    assert "Invalid package specification" in res
 
 
 def test_hf_embeddings_similarity():

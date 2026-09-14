@@ -13,6 +13,7 @@ from src.state import AutomationState
 
 def create_evaluation_router():
     """Route from evaluator to either next executor step, retry, replanner, or finalizer."""
+
     def route_evaluation(state: AutomationState) -> str:
         status = state.get("evaluation_status", "continue")
         if status == "finish":
@@ -23,12 +24,13 @@ def create_evaluation_router():
             return "executor"
         else:
             return "executor"
+
     return route_evaluation
 
 
 def build_automation_graph(llm=None):
     """Construct and compile the LangGraph AI Automation workflow.
-    
+
     Workflow Topology:
       START -> planner -> executor -> evaluator
                            ^             |

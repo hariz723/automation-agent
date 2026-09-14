@@ -12,6 +12,7 @@ from src.tools.registry import get_tool_descriptions
 
 class StepSchema(BaseModel):
     """Schema for an individual subtask."""
+
     id: int = Field(description="Sequential step number starting from 1")
     title: str = Field(description="Short title summarizing the subtask")
     description: str = Field(
@@ -24,6 +25,7 @@ class StepSchema(BaseModel):
 
 class PlanSchema(BaseModel):
     """Schema for the overall execution plan."""
+
     steps: list[StepSchema] = Field(
         description="1 to 5 sequential steps required to complete the user's prompt"
     )
@@ -56,19 +58,23 @@ Guidelines:
     # Attempt structured output first
     try:
         structured_llm = llm.with_structured_output(PlanSchema)
-        response: PlanSchema = structured_llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt),
-        ])
+        response: PlanSchema = structured_llm.invoke(
+            [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=user_prompt),
+            ]
+        )
         for s in response.steps:
-            plan_steps.append({
-                "id": s.id,
-                "title": s.title,
-                "description": s.description,
-                "expected_output": s.expected_output,
-                "status": "pending",
-                "result": None,
-            })
+            plan_steps.append(
+                {
+                    "id": s.id,
+                    "title": s.title,
+                    "description": s.description,
+                    "expected_output": s.expected_output,
+                    "status": "pending",
+                    "result": None,
+                }
+            )
     except Exception:
         # Fallback to direct prompt with JSON instructions
         fallback_prompt = (
@@ -76,34 +82,40 @@ Guidelines:
             + "\nRespond ONLY with a valid JSON object matching this schema:\n"
             + '{"steps": [{"id": 1, "title": "...", "description": "...", "expected_output": "..."}]}'
         )
-        resp = llm.invoke([
-            SystemMessage(content=fallback_prompt),
-            HumanMessage(content=user_prompt),
-        ])
+        resp = llm.invoke(
+            [
+                SystemMessage(content=fallback_prompt),
+                HumanMessage(content=user_prompt),
+            ]
+        )
         content = resp.content if hasattr(resp, "content") else str(resp)
         match = re.search(r"\{.*\}", content, re.DOTALL)
         if match:
             data = json.loads(match.group(0))
             for s in data.get("steps", []):
-                plan_steps.append({
-                    "id": int(s.get("id", len(plan_steps) + 1)),
-                    "title": s.get("title", f"Step {len(plan_steps) + 1}"),
-                    "description": s.get("description", ""),
-                    "expected_output": s.get("expected_output", ""),
-                    "status": "pending",
-                    "result": None,
-                })
+                plan_steps.append(
+                    {
+                        "id": int(s.get("id", len(plan_steps) + 1)),
+                        "title": s.get("title", f"Step {len(plan_steps) + 1}"),
+                        "description": s.get("description", ""),
+                        "expected_output": s.get("expected_output", ""),
+                        "status": "pending",
+                        "result": None,
+                    }
+                )
 
     # Ultimate fallback if empty
     if not plan_steps:
-        plan_steps = [{
-            "id": 1,
-            "title": "Execute Goal",
-            "description": f"Directly execute and complete the requested task: {task}",
-            "expected_output": "The user's prompt is completely fulfilled.",
-            "status": "pending",
-            "result": None,
-        }]
+        plan_steps = [
+            {
+                "id": 1,
+                "title": "Execute Goal",
+                "description": f"Directly execute and complete the requested task: {task}",
+                "expected_output": "The user's prompt is completely fulfilled.",
+                "status": "pending",
+                "result": None,
+            }
+        ]
 
     return {
         "plan": plan_steps,

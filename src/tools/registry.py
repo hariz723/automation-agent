@@ -1,9 +1,9 @@
 """Unified tool registry for the automation agent."""
 
-
 from langchain_core.tools import BaseTool
 
 from src.tools.file_tools import list_files, read_file, write_file
+from src.tools.lint_tools import lint_code
 from src.tools.python_repl import execute_python
 from src.tools.shell_tools import execute_shell
 from src.tools.web_tools import fetch_webpage, web_search
@@ -13,6 +13,7 @@ ALL_TOOLS: list[BaseTool] = [
     write_file,
     read_file,
     list_files,
+    lint_code,
     execute_python,
     web_search,
     fetch_webpage,

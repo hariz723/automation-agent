@@ -1,18 +1,32 @@
 """Unit and integration tests for LangGraph AI Automation Agent."""
 
-import pytest
 from unittest.mock import MagicMock
+
 from langchain_core.messages import AIMessage
 
-from src.tools.file_tools import write_file, read_file, list_files
+from src.graph import build_automation_graph, create_evaluation_router
+from src.nodes.evaluator import EvaluationSchema, evaluator_node
+from src.nodes.finalizer import finalizer_node
+from src.nodes.planner import PlanSchema, StepSchema, planner_node
+from src.state import AutomationState
+from src.tools.file_tools import read_file, write_file
+from src.tools.lint_tools import lint_code
 from src.tools.python_repl import execute_python
 from src.tools.shell_tools import execute_shell
-from src.state import AutomationState
-from src.graph import build_automation_graph, create_evaluation_router
-from src.nodes.planner import planner_node, PlanSchema, StepSchema
-from src.nodes.evaluator import evaluator_node, EvaluationSchema
-from src.nodes.replanner import replanner_node, ReplannedSteps
-from src.nodes.finalizer import finalizer_node
+
+
+def test_lint_code_valid():
+    """Test that lint_code reports pass on valid python code."""
+    valid_code = "x = 42\ny = x + 1\nprint(y)\n"
+    res = lint_code.invoke({"filepath_or_code": valid_code})
+    assert "✅ Lint passed" in res or "✅ Syntax check passed" in res
+
+
+def test_lint_code_invalid():
+    """Test that lint_code detects syntax errors."""
+    invalid_code = "def bad_syntax(:\n    pass\n"
+    res = lint_code.invoke({"filepath_or_code": invalid_code})
+    assert "Lint findings" in res or "Syntax Error" in res or "error" in res.lower()
 
 
 def test_file_tools(tmp_path):

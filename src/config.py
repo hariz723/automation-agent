@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load .env file from project root
@@ -20,8 +21,8 @@ class Config:
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     # Hugging Face Token & Model
-    HUGGINGFACEHUB_API_TOKEN: str = (
-        os.getenv("HUGGINGFACEHUB_API_TOKEN", "") or os.getenv("HF_TOKEN", "")
+    HUGGINGFACEHUB_API_TOKEN: str = os.getenv("HUGGINGFACEHUB_API_TOKEN", "") or os.getenv(
+        "HF_TOKEN", ""
     )
     HF_MODEL: str = os.getenv("HF_MODEL", "Qwen/Qwen2.5-72B-Instruct")
 

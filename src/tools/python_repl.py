@@ -1,8 +1,9 @@
 """Python execution sandbox tool for the automation agent."""
 
-import sys
 import io
+import sys
 import traceback
+
 from langchain_core.tools import tool
 
 
@@ -10,7 +11,7 @@ from langchain_core.tools import tool
 def execute_python(code: str) -> str:
     """Execute Python code in an isolated execution namespace and return stdout/output.
     Use this tool to compute values, transform data, generate structured files, scrape, or automate tasks.
-    
+
     Args:
         code: Complete, valid Python code to execute.
     """

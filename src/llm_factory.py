@@ -1,22 +1,21 @@
 """LLM Factory supporting Google Gemini and Hugging Face models."""
 
-import os
-from typing import Optional
 from langchain_core.language_models.chat_models import BaseChatModel
+
 from src.config import Config
 
 
 def get_llm(
-    provider: Optional[str] = None,
-    model_name: Optional[str] = None,
-    temperature: Optional[float] = None,
+    provider: str | None = None,
+    model_name: str | None = None,
+    temperature: float | None = None,
 ) -> BaseChatModel:
     """Instantiate and return the configured chat language model.
-    
+
     Supports:
       - Google Gemini (default, highly recommended for tool use and speed)
       - Hugging Face (open-source models via Hugging Face Hub inference)
-    
+
     Args:
         provider: 'gemini' or 'huggingface' (defaults to Config.LLM_PROVIDER)
         model_name: Specific model string (defaults to Config settings)
@@ -52,7 +51,7 @@ def get_llm(
                 "Get an access token at: https://huggingface.co/settings/tokens"
             )
 
-        from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+        from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
         repo_id = model_name or Config.HF_MODEL
         endpoint = HuggingFaceEndpoint(

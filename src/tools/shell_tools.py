@@ -1,7 +1,9 @@
 """Shell execution tool for the automation agent."""
 
 import subprocess
+
 from langchain_core.tools import tool
+
 from src.config import Config
 
 
@@ -9,7 +11,7 @@ from src.config import Config
 def execute_shell(command: str) -> str:
     """Execute a bash shell command in the project workspace and return the stdout and stderr.
     Use this to run scripts, CLI utilities, git commands, or check system output.
-    
+
     Args:
         command: The shell command line string to run.
     """
@@ -31,8 +33,7 @@ def execute_shell(command: str) -> str:
             command,
             shell=True,
             cwd=str(Config.WORKSPACE_DIR),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             timeout=Config.TIMEOUT_SECONDS,
         )

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """Main CLI entrypoint for the LangGraph AI Automation Agent."""
 
-import sys
 import argparse
+import sys
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
 from src.config import Config
+from src.graph import build_automation_graph
 from src.llm_factory import get_llm
 from src.runner import run_automation
-from src.graph import build_automation_graph
 
 console = Console()
 
@@ -19,10 +20,13 @@ def visualize_graph(output_file: str = "graph.png"):
     """Export and print graph visualization."""
     try:
         from unittest.mock import MagicMock
+
         # Use dummy LLM to build structure
         app = build_automation_graph(llm=MagicMock())
         mermaid_syntax = app.get_graph().draw_mermaid()
-        console.print(Panel(mermaid_syntax, title="LangGraph Mermaid Workflow", border_style="cyan"))
+        console.print(
+            Panel(mermaid_syntax, title="LangGraph Mermaid Workflow", border_style="cyan")
+        )
 
         try:
             png_bytes = app.get_graph().draw_mermaid_png()
@@ -30,9 +34,35 @@ def visualize_graph(output_file: str = "graph.png"):
                 f.write(png_bytes)
             console.print(f"[bold green]Saved workflow diagram to {output_file}[/bold green]")
         except Exception:
-            console.print("[dim](PNG rendering requires pygraphviz or internet access; Mermaid syntax printed above)[/dim]")
+            console.print(
+                "[dim](PNG rendering requires pygraphviz or internet access; Mermaid syntax printed above)[/dim]"
+            )
     except Exception as e:
         console.print(f"[bold red]Failed to visualize graph: {e}[/bold red]")
+
+
+def run_lint(fix: bool = False):
+    """Run Ruff linter on the codebase."""
+    import subprocess
+
+    cmd = ["ruff", "check"]
+    if fix:
+        cmd.append("--fix")
+    cmd.append(".")
+
+    console.print(f"[bold cyan]Running linter: {' '.join(cmd)}...[/bold cyan]")
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if res.returncode == 0:
+            console.print("[bold green]✅ Lint passed: Codebase is clean![/bold green]")
+        else:
+            console.print("[bold yellow]⚠️ Lint findings:[/bold yellow]")
+            if res.stdout:
+                console.print(res.stdout)
+            if res.stderr:
+                console.print(res.stderr)
+    except FileNotFoundError:
+        console.print("[bold red]Linter error: 'ruff' not found. Install via 'uv sync'.[/bold red]")
 
 
 def interactive_mode(llm):
@@ -73,7 +103,8 @@ def main():
         help="The prompt or use-case instruction to automate.",
     )
     parser.add_argument(
-        "-i", "--interactive",
+        "-i",
+        "--interactive",
         action="store_true",
         help="Run in interactive prompt loop.",
     )
@@ -94,12 +125,28 @@ def main():
         help="Output the LangGraph workflow structure as a Mermaid diagram.",
     )
     parser.add_argument(
-        "-q", "--quiet",
+        "--lint",
+        action="store_true",
+        help="Run code linter (Ruff) across the project.",
+    )
+    parser.add_argument(
+        "--lint-fix",
+        action="store_true",
+        help="Run code linter and automatically fix issues.",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
         action="store_true",
         help="Quiet mode: only output final deliverable.",
     )
 
     args = parser.parse_args()
+
+    # If --lint or --lint-fix flag is set
+    if args.lint or args.lint_fix:
+        run_lint(fix=args.lint_fix)
+        return
 
     # If --visualize flag is set
     if args.visualize:
@@ -146,7 +193,9 @@ def main():
     # Interactive mode
     if args.interactive or not args.prompt:
         if not args.prompt:
-            console.print("[dim]No prompt provided on command line, launching interactive mode...[/dim]")
+            console.print(
+                "[dim]No prompt provided on command line, launching interactive mode...[/dim]"
+            )
         interactive_mode(llm)
         return
 

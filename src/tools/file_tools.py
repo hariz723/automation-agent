@@ -11,7 +11,7 @@ from src.config import Config
 @tool
 def write_file(filepath: str, content: str) -> str:
     """Write or overwrite text content to a file in the workspace.
-    
+
     Args:
         filepath: Relative or absolute path to the file.
         content: Text content to write.
@@ -32,7 +32,7 @@ def write_file(filepath: str, content: str) -> str:
 @tool
 def read_file(filepath: str) -> str:
     """Read and return content of a file from the workspace.
-    
+
     Args:
         filepath: Relative or absolute path to the file.
     """
@@ -43,8 +43,8 @@ def read_file(filepath: str) -> str:
 
         if not path.exists():
             return f"Error: File does not exist: {filepath}"
-        
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
+
+        with open(path, encoding="utf-8", errors="replace") as f:
             content = f.read()
         return content
     except Exception as e:
@@ -54,7 +54,7 @@ def read_file(filepath: str) -> str:
 @tool
 def list_files(directory: str = ".") -> str:
     """List files and directories in the specified workspace path.
-    
+
     Args:
         directory: Relative directory path to list (defaults to workspace root).
     """

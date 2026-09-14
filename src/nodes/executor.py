@@ -1,20 +1,21 @@
 """Executor node: executes the current step in the plan using tools."""
 
-from typing import Dict, Any, List
+from typing import Any
+
 from langchain_core.messages import (
-    SystemMessage,
-    HumanMessage,
-    AIMessage,
-    ToolMessage,
     BaseMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
 )
+
 from src.state import AutomationState, SubTask
 from src.tools.registry import ALL_TOOLS, TOOL_MAP
 
 
-def executor_node(state: AutomationState, llm) -> Dict[str, Any]:
+def executor_node(state: AutomationState, llm) -> dict[str, Any]:
     """Execute the active step from the plan using tool-calling agent loop."""
-    plan: List[SubTask] = list(state.get("plan", []))
+    plan: list[SubTask] = list(state.get("plan", []))
     current_index: int = state.get("current_step_index", 0)
     task: str = state.get("task", "")
     step_history = list(state.get("step_history", []))
@@ -32,13 +33,12 @@ def executor_node(state: AutomationState, llm) -> Dict[str, Any]:
     history_summary = []
     for h in step_history:
         history_summary.append(
-            f"Step {h.get('step_id')}: {h.get('title')}\n"
-            f"Result: {h.get('result')}\n"
+            f"Step {h.get('step_id')}: {h.get('title')}\nResult: {h.get('result')}\n"
         )
     history_str = "\n---\n".join(history_summary) if history_summary else "No prior steps yet."
 
     system_instruction = f"""You are an autonomous AI Execution Agent capable of completing tasks using tools.
-You are currently executing Step {current_step.get('id')}: '{current_step.get('title')}'.
+You are currently executing Step {current_step.get("id")}: '{current_step.get("title")}'.
 
 Overall User Goal:
 {task}
@@ -47,10 +47,10 @@ Previous Completed Steps:
 {history_str}
 
 Current Step Instructions:
-{current_step.get('description')}
+{current_step.get("description")}
 
 Expected Output Criteria:
-{current_step.get('expected_output')}
+{current_step.get("expected_output")}
 
 Guidelines:
 1. Use the provided tools (file operations, Python REPL, web search, shell) to fulfill this step.
@@ -62,9 +62,11 @@ Guidelines:
 
     user_msg_content = f"Execute step {current_step.get('id')}: {current_step.get('title')}."
     if feedback and retry_count > 0:
-        user_msg_content += f"\n\nNote: Previous attempt needed correction. Evaluator feedback:\n{feedback}"
+        user_msg_content += (
+            f"\n\nNote: Previous attempt needed correction. Evaluator feedback:\n{feedback}"
+        )
 
-    messages: List[BaseMessage] = [
+    messages: list[BaseMessage] = [
         SystemMessage(content=system_instruction),
         HumanMessage(content=user_msg_content),
     ]
@@ -105,7 +107,9 @@ Guidelines:
                 )
         else:
             # Final text response from the model
-            final_step_text = ai_msg.content if isinstance(ai_msg.content, str) else str(ai_msg.content)
+            final_step_text = (
+                ai_msg.content if isinstance(ai_msg.content, str) else str(ai_msg.content)
+            )
             break
 
     if not final_step_text:
@@ -115,11 +119,13 @@ Guidelines:
     current_step["result"] = final_step_text
     current_step["status"] = "completed"
 
-    step_history.append({
-        "step_id": current_step.get("id"),
-        "title": current_step.get("title"),
-        "result": final_step_text,
-    })
+    step_history.append(
+        {
+            "step_id": current_step.get("id"),
+            "title": current_step.get("title"),
+            "result": final_step_text,
+        }
+    )
 
     return {
         "plan": plan,

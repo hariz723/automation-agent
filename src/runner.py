@@ -1,10 +1,11 @@
 """Runner module providing rich terminal streaming and execution of the LangGraph workflow."""
 
-from typing import Dict, Any, Optional
+from typing import Any
+
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
-from rich.markdown import Markdown
 
 from src.graph import build_automation_graph
 from src.state import AutomationState
@@ -35,14 +36,14 @@ def run_automation(
     prompt: str,
     llm=None,
     verbose: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute an automation task end-to-end through the LangGraph workflow.
-    
+
     Args:
         prompt: The user prompt or use-case instruction to automate.
         llm: Optional custom BaseChatModel instance (defaults to configured LLM).
         verbose: If True, prints formatted step progress to the console.
-    
+
     Returns:
         The final state dict of the completed workflow.
     """
@@ -73,7 +74,7 @@ def run_automation(
         "error": None,
     }
 
-    final_state: Dict[str, Any] = {}
+    final_state: dict[str, Any] = {}
 
     # Stream graph execution events
     for event in app.stream(initial_state):
@@ -83,7 +84,9 @@ def run_automation(
 
             if node_name == "planner":
                 plan = state_update.get("plan", [])
-                console.print(f"[bold yellow]🎯 Planner:[/bold yellow] Generated {len(plan)} subtasks.")
+                console.print(
+                    f"[bold yellow]🎯 Planner:[/bold yellow] Generated {len(plan)} subtasks."
+                )
                 print_plan_table(plan)
 
             elif node_name == "executor":
@@ -115,7 +118,9 @@ def run_automation(
                 console.print()
 
             elif node_name == "replanner":
-                console.print("[bold magenta]🔄 Replanner:[/bold magenta] Plan dynamically adjusted to overcome obstacle.")
+                console.print(
+                    "[bold magenta]🔄 Replanner:[/bold magenta] Plan dynamically adjusted to overcome obstacle."
+                )
                 new_plan = state_update.get("plan", [])
                 print_plan_table(new_plan)
 

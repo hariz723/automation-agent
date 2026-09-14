@@ -1,16 +1,17 @@
 """End-to-end simulation test verifying complete flow execution."""
 
 from unittest.mock import MagicMock
+
 from langchain_core.messages import AIMessage
-from src.runner import run_automation
-from src.nodes.planner import PlanSchema, StepSchema
+
 from src.nodes.evaluator import EvaluationSchema
-from pathlib import Path
+from src.nodes.planner import PlanSchema, StepSchema
+from src.runner import run_automation
 
 
 def test_full_graph_e2e(tmp_path, monkeypatch):
     """Verify that a prompt goes through planner -> executor -> evaluator -> finalizer end-to-end."""
-    
+
     output_file = tmp_path / "test_result.txt"
 
     # Mock LLM that generates a 1-step plan, calls a tool or completes the step, evaluates to success, and finalizes
@@ -52,7 +53,10 @@ def test_full_graph_e2e(tmp_path, monkeypatch):
         tool_calls=[
             {
                 "name": "write_file",
-                "args": {"filepath": str(output_file), "content": "Automation Result: Fibonacci [0, 1, 1, 2, 3, 5, 8]"},
+                "args": {
+                    "filepath": str(output_file),
+                    "content": "Automation Result: Fibonacci [0, 1, 1, 2, 3, 5, 8]",
+                },
                 "id": "call_write_1",
             }
         ],

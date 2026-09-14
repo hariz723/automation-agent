@@ -9,7 +9,7 @@ from langchain_core.tools import tool
 @tool
 def web_search(query: str, max_results: int = 5) -> str:
     """Search the web for up-to-date information, documentation, news, or answers using DuckDuckGo.
-    
+
     Args:
         query: The search term or question to look up.
         max_results: Maximum number of search results to return (default: 5).
@@ -38,7 +38,7 @@ def web_search(query: str, max_results: int = 5) -> str:
 @tool
 def fetch_webpage(url: str) -> str:
     """Fetch the text content of a webpage given its URL.
-    
+
     Args:
         url: Full HTTP/HTTPS URL of the page to read.
     """
@@ -62,7 +62,9 @@ def fetch_webpage(url: str) -> str:
         # Truncate if extremely long
         max_chars = 8000
         if len(text) > max_chars:
-            text = text[:max_chars] + f"\n... [Truncated {len(text) - max_chars} remaining characters]"
+            text = (
+                text[:max_chars] + f"\n... [Truncated {len(text) - max_chars} remaining characters]"
+            )
 
         return text if text else "Page returned empty content."
 

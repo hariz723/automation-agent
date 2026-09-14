@@ -2,7 +2,7 @@
 
 An autonomous AI agent built with **LangGraph**, designed to turn any user prompt into a structured, self-healing execution flow that accomplishes complex tasks end-to-end.
 
-Supports both **Google Gemini** (recommended for speed and tool use) and **Hugging Face** open-source models.
+Supports both **Google Gemini** (recommended for speed and native tool use) and **Hugging Face** open-source models, managed with **uv** and linted with **Ruff**.
 
 ---
 
@@ -11,11 +11,12 @@ Supports both **Google Gemini** (recommended for speed and tool use) and **Huggi
 - **Goal-Driven Prompt-to-Execution**: Give the agent any prompt or use case, and it plans, executes, evaluates, and delivers the result.
 - **Dynamic LangGraph Architecture**:
   - **Planner**: Decomposes prompts into structured subtasks with success criteria.
-  - **Executor**: Executes steps using a suite of integrated tools (Python REPL, File I/O, Web Search, Shell).
+  - **Executor**: Executes steps using a suite of integrated tools (Python REPL, File I/O, Web Search, Shell, Linter).
   - **Evaluator**: Inspects step output against expected criteria.
   - **Replanner**: Dynamically adapts and rewrites remaining steps if blockers or errors occur.
   - **Finalizer**: Synthesizes results into a polished deliverable.
-- **Tool Suite**:
+- **Integrated Tool Suite**:
+  - 🔍 **Code Linter**: Ruff-powered linting tool (`lint_code`) for verifying and auto-fixing generated Python code.
   - 🐍 **Python REPL**: Dynamic code execution for computations, data analysis, and script running.
   - 📁 **File I/O**: Read, write, and list workspace files.
   - 🌐 **Web Search & Fetch**: DuckDuckGo search and webpage content scraping.
@@ -23,6 +24,9 @@ Supports both **Google Gemini** (recommended for speed and tool use) and **Huggi
 - **Dual LLM Support**:
   - **Google Gemini** (`gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-1.5-flash`) via `langchain-google-genai`.
   - **Hugging Face** (`Qwen/Qwen2.5-72B-Instruct`, `meta-llama/Llama-3.3-70B-Instruct`, etc.) via `langchain-huggingface`.
+- **Packaging & Code Quality**:
+  - Fully managed using modern **`uv`** and `pyproject.toml`.
+  - Integrated **Ruff** linter with zero warnings and auto-fix capabilities.
 - **Rich Terminal UI**: Live streaming execution with tables, panels, and markdown formatting.
 
 ---
@@ -46,14 +50,29 @@ graph TD
 
 ---
 
-## 🚀 Quickstart
+## 🚀 Quickstart with `uv`
 
-### 1. Requirements
+### 1. Environment & Dependencies
 
-All required libraries are specified in `requirements.txt`:
+Install dependencies and synchronize the environment with `uv` (or `make install`):
 ```bash
-pip install -r requirements.txt
+make install
+# or: uv sync --all-extras
 ```
+
+### Quick Commands (`Makefile`)
+| Command | Description |
+| :--- | :--- |
+| `make install` | Install/sync all dependencies with `uv` |
+| `make run PROMPT="..."` | Run agent on a task prompt |
+| `make interactive` | Start interactive prompt shell |
+| `make test` | Run pytest suite |
+| `make lint` | Check code quality with Ruff |
+| `make lint-fix` | Auto-fix code issues with Ruff |
+| `make format` | Format code with Ruff |
+| `make check` | Run linter and tests together |
+| `make visualize` | Export LangGraph workflow diagram |
+| `make clean` | Remove caches and temp files |
 
 ### 2. Configure API Keys
 
@@ -87,53 +106,75 @@ export GEMINI_API_KEY="your_api_key"
 ## 💻 Usage
 
 ### 1. Single Prompt Execution
-Provide any task directly as an argument:
+Provide any task directly as an argument using `uv run`:
 ```bash
-python main.py 
-
-# sample prompt
-"Fetch the latest Python 3.13 release highlights and write a markdown summary to python313_summary.md"
+uv run python main.py "Fetch the latest Python 3.13 release highlights and write a markdown summary to python313_summary.md"
 ```
 
 Another example:
 ```bash
-python main.py 
-
-#sample prompt - 2
-"Create a Python script that generates 100 dummy customer records, calculate average purchase value, and save results to summary.json"
+uv run python main.py "Create a Python script that generates 100 dummy customer records, calculate average purchase value, and save results to summary.json"
 ```
 
 ### 2. Interactive Mode
 Run an interactive session where you can enter prompts continuously:
 ```bash
-python main.py --interactive
-# or
-python main.py -i
+uv run python main.py -i
 ```
 
 ### 3. Model & Provider Selection
 Switch between Gemini and Hugging Face or choose specific models via CLI:
 ```bash
 # Using Gemini 2.5 Pro for complex reasoning
-python main.py "Design and test a caching algorithm in Python" --model gemini-2.5-pro
+uv run python main.py "Design and test a caching algorithm in Python" --model gemini-2.5-pro
 
 # Using Hugging Face open-source model
-python main.py "Analyze trends in artificial intelligence" --provider huggingface
+uv run python main.py "Analyze trends in artificial intelligence" --provider huggingface
 ```
 
 ### 4. Visualize the Workflow
 Export the LangGraph topology as a diagram:
 ```bash
-python main.py --visualize
+uv run python main.py --visualize
 ```
+
+---
+
+## 🔍 Code Quality & Linting
+
+The project integrates **Ruff** for high-speed linting, formatting, and static analysis.
+
+### Run Linter via CLI
+```bash
+# Check codebase with main.py CLI
+uv run python main.py --lint
+
+# Automatically fix lint issues
+uv run python main.py --lint-fix
+```
+
+### Direct Ruff Commands
+```bash
+# Check code issues
+uv run ruff check .
+
+# Fix code issues automatically
+uv run ruff check --fix .
+
+# Code formatter
+uv run ruff format .
+```
+
+### Agent Linter Tool (`lint_code`)
+The agent itself has access to `lint_code` in its toolbelt ([`src/tools/lint_tools.py`](file:///home/hari/projects/automation-agent/src/tools/lint_tools.py)), allowing it to lint generated code during prompt execution before completing tasks!
 
 ---
 
 ## 🧪 Testing
 
-Run the comprehensive test suite (unit tests, tools, router, and end-to-end graph simulation):
+Run the comprehensive test suite (unit tests, tools, linter, router, and end-to-end graph simulation):
 ```bash
-pytest -v tests/
+uv run pytest -v tests/
 ```
 
 ---
@@ -142,10 +183,11 @@ pytest -v tests/
 
 ```
 automation-agent/
-├── main.py                # Main CLI entrypoint
-├── requirements.txt       # Dependencies
+├── pyproject.toml         # Project metadata, dependencies & Ruff config (uv)
+├── requirements.txt       # Requirements backup
 ├── .env.example           # Environment template
 ├── graph.png              # Rendered LangGraph architecture diagram
+├── main.py                # Main CLI entrypoint (with --lint and --visualize)
 ├── src/
 │   ├── config.py          # Configuration and environment loaders
 │   ├── state.py           # TypedDict state definition
@@ -153,6 +195,7 @@ automation-agent/
 │   ├── graph.py           # LangGraph StateGraph compiler
 │   ├── runner.py          # Rich console streaming runner
 │   ├── tools/
+│   │   ├── lint_tools.py  # Ruff-based code linter tool
 │   │   ├── file_tools.py  # File reading, writing, and listing
 │   │   ├── python_repl.py # Dynamic Python execution sandbox
 │   │   ├── web_tools.py   # DuckDuckGo search & webpage scraper
@@ -166,6 +209,6 @@ automation-agent/
 │       └── finalizer.py   # Final synthesis node
 └── tests/
     ├── conftest.py        # Pytest path configuration
-    ├── test_graph.py      # Unit tests for tools, nodes, and router
+    ├── test_graph.py      # Unit tests for tools, nodes, linter, and router
     └── test_e2e.py        # End-to-end integration test
 ```

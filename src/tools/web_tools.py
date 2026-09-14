@@ -15,7 +15,14 @@ def web_search(query: str, max_results: int = 5) -> str:
         max_results: Maximum number of search results to return (default: 5).
     """
     try:
-        from duckduckgo_search import DDGS
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            import warnings
+
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                from duckduckgo_search import DDGS
 
         results = []
         with DDGS() as ddgs:
